@@ -28,8 +28,6 @@ void readArray(int *arr, int n) {
 
 int main() {
 
-    umask(0002);
-
     randfile = open("/dev/random", O_RDONLY);
     if (randfile == -1) {
         printf("errno: %d\terror: %s\n", errno, strerror(errno));
@@ -51,7 +49,7 @@ int main() {
     readArray(arr, 10);
 
     printf("\nWriting numbers to file...\n");
-    int toWrite = open("temp.txt", O_CREAT | O_RDWR, 0664);
+    int toWrite = open("temp.txt", O_CREAT | O_WRONLY, 0664);
     int checkWrite = write(toWrite, arr, sizeof(arr));
 
     if (checkWrite == -1) {
@@ -60,10 +58,12 @@ int main() {
     }
 
     printf("\n");
+    close(toWrite);
 
     printf("Reading numbers from file...\n");
     int newArr[10];
-    int checkRead = pread(toWrite, newArr, sizeof(newArr), 0);
+    int toRead = open("temp.txt", O_RDONLY);
+    int checkRead = read(toRead, newArr, sizeof(newArr));
     
     if (checkRead == -1) {
         printf("Reading failed. errno: %d - %s\n", errno, strerror(errno));
@@ -75,6 +75,6 @@ int main() {
     readArray(newArr, 10);
 
     close(randfile);
-    close(toWrite);
+    close(toRead);
 }
 
