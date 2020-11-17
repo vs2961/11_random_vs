@@ -30,7 +30,7 @@ int main() {
 
     randfile = open("/dev/random", O_RDONLY);
     if (randfile == -1) {
-        printf("errno: %d\terror: %s\n", errno, strerror(errno));
+        printf("errno: %d - error: %s\n", errno, strerror(errno));
         return 0;
     }
 
@@ -39,7 +39,8 @@ int main() {
     for (i = 0; i < 10; i++) {
         int getRandom = random();
         if (getRandom == -1) {
-            printf("Failed to get random %d", i);
+            printf("Failed to get random %d\n", i);
+            printf("errno: %d - error: %s\n", errno, strerror(errno));
             return 0;
         }
         arr[i] = getRandom;
@@ -48,8 +49,8 @@ int main() {
     printf("Generating random numbers:\n");
     readArray(arr, 10);
 
-    printf("\nWriting numbers to file...\n");
-    int toWrite = open("temp.txt", O_CREAT | O_WRONLY, 0664);
+    printf("\nWriting numbers to temp.txt...\n");
+    int toWrite = open("nums", O_CREAT | O_WRONLY, 0664);
     int checkWrite = write(toWrite, arr, sizeof(arr));
 
     if (checkWrite == -1) {
@@ -60,9 +61,15 @@ int main() {
     printf("\n");
     close(toWrite);
 
-    printf("Reading numbers from file...\n");
+    printf("Reading numbers from temp.txt...\n");
     int newArr[10];
-    int toRead = open("temp.txt", O_RDONLY);
+    int toRead = open("nums", O_RDONLY);
+
+    if (toRead == -1) {
+        printf("Failed to read from file. errno: %d - %s\n", errno, strerror(errno));
+        return 0;
+    }
+
     int checkRead = read(toRead, newArr, sizeof(newArr));
     
     if (checkRead == -1) {
